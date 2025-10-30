@@ -57,12 +57,18 @@ void MyHashMap::insert(int key, int value) {
         if(curr->next == nullptr) {
             curr->next = temp;
             this->size++;
-            rehash();
+            if(loadFactor() > 0.7) {
+                rehash();
+            }
             return;
         }
         curr = curr->next;
     }
+    if(loadFactor() > 0.7){
+        rehash();
+    }
     head[index] = temp;
+    this->size++;
 }
 
 /** 
@@ -136,6 +142,9 @@ void MyHashMap::rehash() {
         vector<MapNode<int,int>*> oldHead = head;
         this->buckets *= 2;
         head = vector<MapNode<int,int>*>(buckets);
+
+        this->size = 0;
+
         for(int i = 0; i < oldHead.size(); i++) { 
         MapNode<int,int>* curr = oldHead[i];
         while(curr != nullptr) {
@@ -144,6 +153,7 @@ void MyHashMap::rehash() {
             curr = curr->next;
             temp->next = head[index];
             head[index] = temp;
+            this->size++;
         }
         }
     } else {
