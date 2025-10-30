@@ -24,9 +24,12 @@ class MyHashMap {
         return key % buckets;
     }
     public:
+
     MyHashMap(int buckets) {
+        this->size =0;
         this->buckets = buckets;
-        this->size = 0;
+        //初始化的要点
+        head.resize(buckets, nullptr);
     }
     
     void insert(int key, int value);
@@ -35,6 +38,7 @@ class MyHashMap {
     bool containsKey(int key);
     void rehash();
     int loadFactor();   
+    void print();
 };
 
 /**
@@ -47,16 +51,18 @@ class MyHashMap {
 void MyHashMap::insert(int key, int value) {
     int index = hash(key);
     MapNode<int,int>* temp = new MapNode<int,int>(key, value);
-    //TODO : Implement the insert function
+    //TODO 
     MapNode<int,int>* curr = head[index];
     while(curr != nullptr) {
         if(curr->next == nullptr) {
             curr->next = temp;
+            this->size++;
             rehash();
             return;
         }
         curr = curr->next;
     }
+    head[index] = temp;
 }
 
 /** 
@@ -66,18 +72,20 @@ void MyHashMap::insert(int key, int value) {
 void MyHashMap::remove(int key) {
     int index = hash(key);
     MapNode<int,int>* curr = head[index];
-    MapNode<int,int>* prev = NULL;
-    while(curr != NULL) {
-        if(curr->Key == key) {
-            if(prev == NULL) {
-                head[index] = curr->next;
-            } else {
-                prev->next = curr->next;
-            }
-            delete curr;
-        }
+    if(curr == nullptr) return;
+    if(curr->Key == key) {
+        head[index] = curr->next;
+        this->size--;
+        delete curr;
+        return;
     }
-
+    while(curr->next->Key != key) {
+        curr = curr->next;
+    }
+    MapNode<int,int>* temp = curr->next;
+    curr->next = temp->next;
+    this->size--;
+    delete temp;
 }
 
 /**
@@ -100,7 +108,7 @@ int MyHashMap::getValue(int key) {
  * @brief Returns true if the hash map contains the given key.
  */
 int MyHashMap::loadFactor() {
-    return size/buckets;
+    return this->size/buckets;
 }
 
 /**
@@ -143,10 +151,23 @@ void MyHashMap::rehash() {
     }
 }
 
+/**
+ * @brief Prints all the key-value pairs in the hash map.
+ */
+void MyHashMap::print(){
+    for(int i = 0; i < head.size(); i++){
+        MapNode<int,int>* curr = head[i];
+        while(curr != nullptr) {
+            cout << curr->Key << " " << curr->Value << endl;
+            curr = curr->next;
+        }
+    }
+}
+
 int main(){
-    MyHashMap m(5);
+    MyHashMap m(6);
     while(1) {
-        cout << "1. Insert\n2. Get\n3. Remove\n4. Contains Key\n5. Rehash\n6. Load Factor\n7. Exit\n";
+        cout << "1. Insert\n2. Get\n3. Remove\n4. Contains Key\n5. Rehash\n6. Load Factor\n7. Exit\n8. Print\n";
         int choice;
         cout << "Enter your choice: ";
         cin >> choice;
@@ -182,6 +203,10 @@ int main(){
                 break;
                 case 7:
                 return 0;
+                case 8:
+                m.print();
+                break;
+
         }
     }
 }
